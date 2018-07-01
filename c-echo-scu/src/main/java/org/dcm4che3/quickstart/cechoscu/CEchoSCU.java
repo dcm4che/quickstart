@@ -97,7 +97,7 @@ public class CEchoSCU {
     }
 
     private Connection mkConnection(String hostName, int port) {
-        return new Connection("dicom", hostName, port);
+        return new Connection(null, hostName, port);
     }
 
     public static void main(String[] args) throws Exception {
