@@ -89,7 +89,7 @@ public class CEchoSCU {
 
     private AAssociateRQ mkAARQ(String calledAET) {
         AAssociateRQ aarq = new AAssociateRQ();
-        aarq.setCallingAET(ae.getAETitle()); // if not explicitly set, will be set in ae.connect().
+        aarq.setCallingAET(ae.getAETitle()); // optional: will be set in ae.connect() if not explicitly set.
         aarq.setCalledAET(calledAET);
         aarq.addPresentationContext(new PresentationContext(1,
                 UID.VerificationSOPClass, UID.ImplicitVRLittleEndian));
