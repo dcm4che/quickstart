@@ -39,15 +39,19 @@
  *
  */
 
-package org.dcm4che3.quickstart.cechoscp;
+package org.dcm4che3.quickstart.cstorescp;
 
-import org.dcm4che3.data.UID;
-import org.dcm4che3.net.ApplicationEntity;
-import org.dcm4che3.net.Connection;
-import org.dcm4che3.net.Device;
-import org.dcm4che3.net.TransferCapability;
+import org.dcm4che3.data.Attributes;
+import org.dcm4che3.data.Tag;
+import org.dcm4che3.io.DicomOutputStream;
+import org.dcm4che3.net.*;
+import org.dcm4che3.net.pdu.PresentationContext;
 import org.dcm4che3.net.service.BasicCEchoSCP;
+import org.dcm4che3.net.service.BasicCStoreSCP;
+import org.dcm4che3.net.service.DicomServiceRegistry;
+import org.dcm4che3.util.StreamUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.concurrent.Executor;
@@ -59,12 +63,13 @@ import java.util.concurrent.ScheduledExecutorService;
  * @author Gunter Zeilinger <gunterze@gmail.com>
  * @since Jul 2018
  */
-public class CEchoSCP {
+public class CStoreSCP {
     private Device device;
     private ApplicationEntity ae;
     private Connection conn;
+    private String storageDir;
 
-    public CEchoSCP(String calledAET, String bindAddress, int port) {
+    public CStoreSCP(String calledAET, String bindAddress, int port, String storageDir) {
         device = new Device("c-echo-scp");
         ae = new ApplicationEntity(calledAET);
         conn = new Connection(null, "127.0.0.1", port);
@@ -73,8 +78,9 @@ public class CEchoSCP {
         device.addConnection(conn);
         ae.addConnection(conn);
         ae.addTransferCapability(new TransferCapability(null,
-                UID.VerificationSOPClass, TransferCapability.Role.SCP, UID.ImplicitVRLittleEndian));
-        device.setDimseRQHandler(new BasicCEchoSCP());
+                        "*", TransferCapability.Role.SCP, "*"));
+        device.setDimseRQHandler(createServiceRegistry());
+        this.storageDir = storageDir;
     }
 
     public void setExecutor(Executor executor) {
@@ -89,11 +95,38 @@ public class CEchoSCP {
         device.bindConnections();
     }
 
+    private DimseRQHandler createServiceRegistry() {
+        DicomServiceRegistry serviceRegistry = new DicomServiceRegistry();
+        serviceRegistry.addDicomService(new BasicCEchoSCP());
+        serviceRegistry.addDicomService(new BasicCStoreSCP("*") {
+            @Override
+            protected void store(Association as, PresentationContext pc, Attributes rq,
+                                 PDVInputStream data, Attributes rsp) throws IOException {
+                CStoreSCP.this.store(as, pc, rq, data, rsp);
+            }
+        });
+        return serviceRegistry;
+    }
+
+    private void store(Association as, PresentationContext pc, Attributes rq, PDVInputStream data, Attributes rsp)
+            throws IOException {
+        String cuid = rq.getString(Tag.AffectedSOPClassUID);
+        String iuid = rq.getString(Tag.AffectedSOPInstanceUID);
+        String tsuid = pc.getTransferSyntax();
+        Attributes fmi = as.createFileMetaInformation(iuid, cuid, tsuid);
+        File file = new File(storageDir, iuid);
+        file.getParentFile().mkdirs();
+        try (DicomOutputStream dos = new DicomOutputStream(file)) {
+            dos.writeFileMetaInformation(fmi);
+            StreamUtils.copy(data, dos);
+        }
+    }
+
     public static void main(String[] args) throws Exception {
         CLI cli = CLI.parse(args);
         ExecutorService executor = Executors.newCachedThreadPool();
         ScheduledExecutorService scheduledExecutor = Executors.newSingleThreadScheduledExecutor();
-        CEchoSCP scp = new CEchoSCP(cli.calledAET, cli.bindAddress, cli.port);
+        CStoreSCP scp = new CStoreSCP(cli.calledAET, cli.bindAddress, cli.port, cli.directory);
         scp.setExecutor(executor);
         scp.setScheduledExecutor(scheduledExecutor);
         scp.start();
@@ -103,18 +136,20 @@ public class CEchoSCP {
         final String calledAET;
         final String bindAddress;
         final int port;
+        final String directory;
 
         CLI(String[] args) {
             calledAET = args[0];
             bindAddress = args[1];
             port = Integer.parseInt(args[2]);
+            directory = args[3];
         }
 
         static CLI parse(String[] args) {
             try {
                 return new CLI(args);
             } catch (IndexOutOfBoundsException | NumberFormatException e) {
-                System.out.println("Usage: c-echo-scp <called-aet> <bind-address> <port>");
+                System.out.println("Usage: c-store-scp <called-aet> <bind-address> <port> <directory>");
                 System.exit(-1);
                 return null;
             }
