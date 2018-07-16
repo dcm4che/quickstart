@@ -74,6 +74,9 @@ public class CStoreSCP {
         ae = new ApplicationEntity(calledAET);
         conn = new Connection(null, "127.0.0.1", port);
         conn.setBindAddress(bindAddress);
+        // enable Asynchronous Operations
+        conn.setMaxOpsInvoked(0);
+        conn.setMaxOpsPerformed(0);
         device.addApplicationEntity(ae);
         device.addConnection(conn);
         ae.addConnection(conn);

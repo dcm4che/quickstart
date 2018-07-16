@@ -75,6 +75,9 @@ public class CStoreSCU {
         device = new Device("c-store-scu");
         ae = new ApplicationEntity(callingAET);
         conn = new Connection();
+        // enable Asynchronous Operations
+        conn.setMaxOpsInvoked(0);
+        conn.setMaxOpsPerformed(0);
         device.addApplicationEntity(ae);
         device.addConnection(conn);
         ae.addConnection(conn);
