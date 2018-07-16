@@ -135,7 +135,7 @@ public class CStoreSCU {
         String iuid;
         String cuid;
         String tsuid;
-        long endOfFMI;
+        long fmiLength;
         IOException ex;
 
         DicomFile(File file) {
@@ -143,7 +143,7 @@ public class CStoreSCU {
             try (DicomInputStream dis = new DicomInputStream(file)) {
                 Attributes fmi = dis.readFileMetaInformation();
                 if (fmi != null) { // DICOM Part 10 File
-                    endOfFMI = dis.getPosition();
+                    fmiLength = dis.getPosition();
                     cuid = fmi.getString(Tag.MediaStorageSOPClassUID);
                     iuid = fmi.getString(Tag.MediaStorageSOPInstanceUID);
                     tsuid = fmi.getString(Tag.TransferSyntaxUID);
@@ -170,7 +170,7 @@ public class CStoreSCU {
         @Override
         public void writeTo(PDVOutputStream out, String tsuid) throws IOException {
             try (FileInputStream in = new FileInputStream(file)) {
-                in.skip(endOfFMI);
+                in.skip(fmiLength);
                 StreamUtils.copy(in, out);
             }
         }
