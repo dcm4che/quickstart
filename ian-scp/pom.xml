@@ -40,39 +40,29 @@
   ~
   -->
 
-<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xmlns="http://maven.apache.org/POM/4.0.0"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <parent>
+    <artifactId>quickstart-parent</artifactId>
+    <groupId>org.dcm4che.quickstart</groupId>
+    <version>5.13.3</version>
+  </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <groupId>org.dcm4che.quickstart</groupId>
-  <artifactId>quickstart-parent</artifactId>
-  <version>5.13.3</version>
-  <packaging>pom</packaging>
+  <artifactId>ian-scp</artifactId>
 
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-
-  <build>
-    <plugins>
-      <plugin>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-
-  <modules>
-    <module>c-echo-scp</module>
-    <module>c-echo-scu</module>
-    <module>c-store-scp</module>
-    <module>c-store-scu</module>
-    <module>ian-scp</module>
-  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>org.dcm4che</groupId>
+      <artifactId>dcm4che-core</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.dcm4che</groupId>
+      <artifactId>dcm4che-net</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+  </dependencies>
 
 </project>
