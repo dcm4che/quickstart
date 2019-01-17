@@ -46,7 +46,7 @@
   <parent>
     <artifactId>quickstart-parent</artifactId>
     <groupId>org.dcm4che.quickstart</groupId>
-    <version>5.13.3</version>
+    <version>5.15.1</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
 

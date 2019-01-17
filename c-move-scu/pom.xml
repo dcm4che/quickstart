@@ -50,7 +50,7 @@
   </parent>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>c-store-scu</artifactId>
+  <artifactId>c-move-scu</artifactId>
 
   <dependencies>
     <dependency>

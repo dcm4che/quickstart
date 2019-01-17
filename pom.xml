@@ -47,7 +47,7 @@
 
   <groupId>org.dcm4che.quickstart</groupId>
   <artifactId>quickstart-parent</artifactId>
-  <version>5.13.3</version>
+  <version>5.15.1</version>
   <packaging>pom</packaging>
 
   <properties>
@@ -70,6 +70,7 @@
   <modules>
     <module>c-echo-scp</module>
     <module>c-echo-scu</module>
+    <module>c-move-scu</module>
     <module>c-store-scp</module>
     <module>c-store-scu</module>
     <module>ian-scp</module>
